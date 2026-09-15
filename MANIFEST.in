@@ -1,0 +1,4 @@
+include AGENTS.md
+recursive-include docs *.md *.html *.json *.csv *.png *.svg *.ep
+recursive-include examples *.csv *.json *.py *.md *.html *.ep
+recursive-include tests *.py

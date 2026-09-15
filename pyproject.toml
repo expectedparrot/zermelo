@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zermelo"
+version = "0.2.0"
+description = "Rank many entrants through small agent ranking tasks and pairwise comparison models"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["click>=8.1", "numpy>=1.24", "scipy>=1.10"]
+
+[project.optional-dependencies]
+fielding = ["edsl>=1.0.8"]
+dev = ["pytest>=8", "ruff>=0.6", "build"]
+docs = ["pygments>=2.15", "matplotlib>=3.6"]
+
+[project.scripts]
+zermelo = "zermelo.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["zermelo*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

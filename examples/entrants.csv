@@ -1,0 +1,21 @@
+id,name,description
+e01,Search improvements,Improve relevance and support filters in product search.
+e02,Mobile checkout,Reduce the number of steps needed to pay on a phone.
+e03,Saved lists,Let customers save products into named lists.
+e04,Order tracking,Show clear delivery progress and delays.
+e05,Product comparison,Compare specifications side by side.
+e06,Guest checkout,Allow purchases without creating an account.
+e07,Accessibility,Improve keyboard navigation and screen reader support.
+e08,Faster pages,Reduce page load time on slow connections.
+e09,Better photographs,Provide detailed product photography and zoom.
+e10,Customer reviews,Add verified purchase reviews with helpfulness voting.
+e11,Returns portal,Make it easy to request and track returns.
+e12,Stock alerts,Notify customers when products become available.
+e13,Recommendations,Suggest products based on current browsing context.
+e14,Live support,Offer real-time help during business hours.
+e15,Size guidance,Help customers choose the correct size.
+e16,Subscriptions,Offer recurring delivery for frequently purchased products.
+e17,Gift options,Add gift wrapping and personalized messages.
+e18,Local pickup,Allow customers to collect purchases from a nearby location.
+e19,Price transparency,Show all fees and delivery costs before checkout.
+e20,Account security,Improve account protection and recovery.

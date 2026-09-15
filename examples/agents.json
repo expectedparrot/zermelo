@@ -1,0 +1,20 @@
+[
+  {
+    "id": "busy_customer",
+    "traits": {
+      "perspective": "You are a busy customer who shops on a phone and values speed, clarity, and reliable delivery."
+    }
+  },
+  {
+    "id": "careful_customer",
+    "traits": {
+      "perspective": "You research purchases carefully, compare alternatives, and value detailed information and transparent prices."
+    }
+  },
+  {
+    "id": "occasional_customer",
+    "traits": {
+      "perspective": "You shop online infrequently and value simple navigation, accessibility, and easy access to help."
+    }
+  }
+]

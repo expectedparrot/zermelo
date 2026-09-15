@@ -1,0 +1,51 @@
+state,id,pooled_bt_rank,pooled_elo_rank,outdoors,city_culture,beach_relaxation,food_music,history,family
+California,CA,1,1,15,3,3,11,17,1
+North Carolina,NC,2,2,20,19,10,13,10,5
+New York,NY,3,5,32,2,26,7,6,12
+South Carolina,SC,4,4,35,8,8,10,9,9
+Georgia,GA,5,3,25,15,13,9,5,16
+Massachusetts,MA,6,6,43,5,7,24,2,7
+Virginia,VA,7,8,30,11,14,31,4,4
+Washington,WA,8,14,10,12,18,19,32,19
+Tennessee,TN,9,7,21,14,40,1,20,13
+Pennsylvania,PA,10,10,26,4,32,26,1,15
+New Mexico,NM,11,9,14,10,27,6,7,38
+Texas,TX,12,16,31,13,12,3,22,26
+Hawaii,HI,13,19,19,40,2,25,19,3
+Illinois,IL,14,13,47,1,30,2,3,29
+Maryland,MD,15,15,42,17,11,18,13,10
+Oregon,OR,16,18,11,18,19,12,41,22
+Louisiana,LA,17,11,33,6,25,4,11,35
+Rhode Island,RI,18,12,44,7,6,17,21,21
+New Jersey,NJ,19,21,50,9,4,22,25,8
+Michigan,MI,20,20,24,29,16,14,31,6
+Alabama,AL,21,17,46,21,9,16,8,11
+Mississippi,MS,22,22,39,26,15,5,12,42
+Missouri,MO,23,23,29,22,36,8,23,32
+Maine,ME,24,25,9,36,24,21,40,31
+Kentucky,KY,25,24,23,28,29,15,18,34
+Connecticut,CT,26,27,40,16,17,38,14,25
+Arizona,AZ,27,26,5,33,28,28,29,28
+Wyoming,WY,28,28,2,43,39,40,26,17
+Wisconsin,WI,29,29,37,31,21,23,43,14
+Vermont,VT,30,31,12,32,33,20,30,37
+Delaware,DE,31,33,45,30,5,50,24,18
+Minnesota,MN,32,34,8,24,34,27,45,40
+Colorado,CO,33,30,6,27,46,37,39,23
+Florida,FL,34,35,49,35,1,42,50,2
+South Dakota,SD,35,32,18,38,41,46,15,24
+Ohio,OH,36,38,48,20,38,32,27,20
+New Hampshire,NH,37,36,16,37,37,41,33,27
+Arkansas,AR,38,37,22,41,31,29,35,39
+Nevada,NV,39,44,36,25,20,49,49,30
+Idaho,ID,40,41,4,44,35,39,44,41
+Alaska,AK,41,42,3,46,23,45,42,45
+Indiana,IN,42,40,34,23,22,47,38,33
+Utah,UT,43,43,7,39,47,35,46,36
+West Virginia,WV,44,39,13,45,44,30,28,44
+Montana,MT,45,46,1,50,45,36,48,43
+Oklahoma,OK,46,45,41,34,42,33,16,46
+North Dakota,ND,47,47,17,48,48,48,34,47
+Nebraska,NE,48,50,28,49,50,43,36,50
+Iowa,IA,49,49,38,42,43,34,47,48
+Kansas,KS,50,48,27,47,49,44,37,49
