@@ -1,5 +1,9 @@
 # Zermelo
 
+<p align="center">
+  <a href="https://github.com/expectedparrot/zermelo"><img src="docs/assets/zermelo-artwork.jpg" width="640" alt="Zermelo artwork: two parrots playing chess inside expectation brackets"></a>
+</p>
+
 Rank a large pool of options by asking agents to rank small, overlapping groups.
 Zermelo fits whole group rankings with **Plackett–Luce**, or combines their implied
 pairwise wins using **Bradley–Terry** scores or **Elo ratings**. Repeated-subset
