@@ -4,22 +4,36 @@ import html
 import json
 import pprint
 import re
-import shlex
 import shutil
 import sys
 import tempfile
+import textwrap
 from pathlib import Path
 
 from diagnostic_plots import build_diagnostics
 from edsl import Agent, AgentList, Results
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
+from pygments.lexer import inherit
 from pygments.lexers import BashLexer, JsonLexer, PythonLexer
+from pygments.token import Name
 
 from zermelo.design import adaptive_design
 from zermelo.diagnostics import information_budget, perturbation
 from zermelo.scoring import score
 from zermelo.store import Store
+
+
+class TutorialBashLexer(BashLexer):
+    """Color the tutorial's external commands and flags as well as shell syntax."""
+
+    tokens = {
+        "root": [
+            (r"(?<!\S)(?:zermelo|ep|python|mkdir)\b", Name.Function),
+            (r"(?<!\S)--?[a-zA-Z][\w-]*", Name.Attribute),
+            inherit,
+        ],
+    }
 
 
 def main():
@@ -86,7 +100,7 @@ def main():
     formatter = HtmlFormatter(nowrap=True)
 
     def syntax(text, language):
-        lexer = {"bash": BashLexer, "json": JsonLexer, "python": PythonLexer}[language](stripnl=False, ensurenl=False)
+        lexer = {"bash": TutorialBashLexer, "json": JsonLexer, "python": PythonLexer}[language](stripnl=False, ensurenl=False)
         return highlight(text, lexer, formatter).removesuffix("\n")
 
     def command(text, captured=None, label=None, excerpt=False, language="bash"):
@@ -116,7 +130,11 @@ def main():
     figures["SET_PROJECT"] = command('mkdir -p runs/states\nzermelo project use runs/states')
     figures["PREPARE"] = command('python examples/states_visit/prepare.py "runs/states/inputs"',
                                  {"states": 50, "profiles": 6, "output": "runs/states/inputs", "agent_list": "runs/states/inputs/agent_list.ep"})
-    figures["INIT"] = command('zermelo init \\\n  --criterion ' + shlex.quote(state["criterion"]),
+    # Preserve spaces exactly: Bash removes each backslash-newline inside quotes.
+    criterion_lines = textwrap.wrap(state["criterion"], width=64, drop_whitespace=False,
+                                    replace_whitespace=False, break_long_words=False, break_on_hyphens=False)
+    criterion = "\\\n".join(re.sub(r'([\\"$`])', r'\\\1', line) for line in criterion_lines)
+    figures["INIT"] = command('zermelo init \\\n  --criterion "' + criterion + '"',
                               {"status": "ok", "data": {"project": "runs/states", "criterion": state["criterion"]}}, excerpt=True)
     figures["IMPORT_ENTRANTS"] = command('zermelo entrants import "runs/states/inputs/entrants.csv"', log("entrants.json"))
     figures["ENTRANT_SAMPLE"] = table(["ID", "Name", "Information supplied"],
