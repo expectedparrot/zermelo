@@ -85,7 +85,11 @@ def build_jobs(design, agents, model):
         question_text="Rank these candidates from BEST to WORST according to this criterion:\n"
                       "{{ criterion }}\n\n{{ candidates }}\n\n"
                       "Use only the supplied candidate information and your judgment. "
-                      "Rank every candidate exactly once. No ties or omissions.",
+                      "Rank every candidate exactly once. No ties or omissions.\n\n"
+                      f"Response format: return ONLY one JSON array containing exactly these {design['chunk_size']} "
+                      f"integer option indices, in your preferred order: {list(range(design['chunk_size']))}. "
+                      "Include every index exactly once. Do not return entrant IDs or names. "
+                      "Do not omit an option. Do not add prose outside the array.",
         question_options=["{{ option_" + str(i) + " }}" for i in range(design["chunk_size"])],
         num_selections=design["chunk_size"], use_code=True,
     )
