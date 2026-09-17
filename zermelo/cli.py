@@ -21,7 +21,8 @@ from .diagnostics import assess_snapshot, information_budget, observed_graph, pe
 from .project import MARKER, resolve_project
 from .rankers import add_rankers, registered_path
 from .scoring import score
-from .store import Store, ZermeloError, digest, read_json, register_entrants, write_new
+from .store import Store, ZermeloError, digest, evidence_hash, read_json, register_entrants, write_new
+from .workflow import guidance, register_report
 
 
 def emit(data=None, *, errors=None, warnings=None, next_steps=None, command=None):
@@ -151,7 +152,7 @@ def capabilities():
           "incremental_entrants": True, "uncertainty": "cluster multiplier bootstrap", "entrant_formats": ["csv", "json"],
           "result_formats": ["edsl.Results.ep", "manual-json"],
           "native_ep_available": importlib.util.find_spec("edsl") is not None,
-          "execution": "external via ep run", "strict_full_rankings": True})
+          "execution": "external via ep run", "strict_full_rankings": True, "workflow_schema_version": 1})
 
 
 @main.command()
@@ -181,7 +182,19 @@ def guide():
         "assess snapshot.json --tolerance .02: compare after new complete ballots; reports movement and sensitivity, not truth error.",
         "entrants import more.csv; batch plan newcomers --only-new --rounds 1: connect unobserved entrants to rated anchors.",
         "status and next: inspect missing cells and suggested next steps. rank requires complete production batches by default.",
-    ], "project_option": "Precedence: --project DIR, ZERMELO_PROJECT, nearest project-use marker or containing project, cwd.",
+    ], "agent_workflow": {
+        "entrypoint": "Select a project, run guide once, then call next after each action.",
+        "contract": "next returns stage, reason, and actions with argv, required_inputs, runnable, prerequisites, "
+                    "external, and may_spend_credits. Fill input placeholders before execution. "
+                    "next_steps contains only commands without missing inputs; these are suggestions, not an execution queue.",
+        "rankers": "The guided path asks for a native AgentList before planning/export. Existing exported panels stay frozen.",
+        "recovery": "Partial imports lead to a cached rerun of the frozen full job at a fresh path. "
+                    "Review full-job cost; cache misses can rerun successful cells. Import rejects conflicts.",
+        "completion": "rank --output records a saved deliverable. next reports complete only while its evidence and "
+                      "artifact hashes match. Printing a ranking alone does not complete the saved-output workflow.",
+        "calibration": "analyze records its report and next advances to production; no recommendation requires an explicit size choice.",
+        "execution": "next is read-only and never exports jobs, runs inference, or spends credits.",
+    }, "project_option": "Precedence: --project DIR, ZERMELO_PROJECT, nearest project-use marker or containing project, cwd.",
           "methods": {"pl": "Default CLI: L2-regularized Plackett-Luce likelihood of each whole strict ranking; order invariant.",
                       "bt": "L2-regularized Bradley-Terry pairwise composite likelihood; order invariant.",
                       "elo": "One canonical-order pass with simultaneous within-ballot Elo updates; order sensitive."},
@@ -354,53 +367,8 @@ def status(store):
 @click.pass_obj
 def next_command(store):
     """Suggest the next command from persisted project state."""
-    prefix = (["zermelo", "--project", str(store.root)] if store.selection_source == "--project" else ["zermelo"])
-    action = prefix + ["guide"]
-    try:
-        state = store.load()
-    except ZermeloError as exc:
-        if exc.code != "not_initialized":
-            raise
-        emit({"stage": "initialize", "requirement": "Choose a criterion and initialize the project."},
-             next_steps=[shlex.join(action)])
-        return
-    if len(state["entrants"]) < 2:
-        stage = "register_entrants"
-        action = prefix + ["entrants", "add", "--help"]
-    elif not state["batches"]:
-        stage = "plan"
-        action = prefix + ["batch", "plan", "batch-1"]
-    else:
-        stage = "ready_to_rank"
-        action = prefix + ["rank"]
-        for key, batch_data in state["batches"].items():
-            if batch_data["fielding"] is None:
-                stage = "export"
-                action = prefix + ["batch", "export", key, "--help"]
-                break
-            if not fielding.coverage(state, key)["complete"]:
-                path = fielding.artifact_path(store, key, "results_path")
-                stage = "import_results" if path.exists() else "awaiting_external_results"
-                if path.exists() and not batch_data["imports"]:
-                    action = prefix + ["results", "import", key, str(path)]
-                elif batch_data["imports"]:
-                    stage = "incomplete_results"
-                    action = prefix + ["status"]
-                else:
-                    action = shlex.split(batch_data["fielding"]["run_command"])
-                break
-    if stage == "ready_to_rank":
-        graph = observed_graph(state)
-        if not graph["ranking_ballots"] and state.get("calibrations"):
-            stage = "analyze_calibration"
-            action = prefix + ["calibrate", "analyze", next(reversed(state["calibrations"]))]
-        elif graph["unobserved"]:
-            stage = "plan_unobserved"
-            action = prefix + ["batch", "plan", "newcomers", "--only-new", "--rounds", "1"]
-        elif len(graph["components"]) > 1:
-            stage = "connect_components"
-            action = prefix + ["batch", "plan", "bridges", "--rounds", "1"]
-    emit({"stage": stage, "project": str(store.root)}, next_steps=[shlex.join(action)])
+    data = guidance(store)
+    emit(data, next_steps=[item["command"] for item in data["actions"] if item["runnable"]])
 
 
 @main.command()
@@ -416,7 +384,8 @@ def next_command(store):
 @click.pass_obj
 def rank(store, method, regularization, k_factor, weighting, allow_incomplete, output, bootstrap, cluster, seed):
     """Fit overall rankings from registered ballots; require complete coverage by default."""
-    data = fit_project(store.load(), method=method, regularization=regularization, k_factor=k_factor,
+    state = store.load()
+    data = fit_project(state, method=method, regularization=regularization, k_factor=k_factor,
                        weighting=weighting, allow_incomplete=allow_incomplete,
                        bootstrap=bootstrap, cluster=cluster, seed=seed)
     warnings = data["warnings"]
@@ -435,7 +404,10 @@ def rank(store, method, regularization, k_factor, weighting, allow_incomplete, o
             write_new(output, data)
         else:
             raise ZermeloError("invalid_output", "Ranking output must end in .json or .csv")
-    emit(data, warnings=warnings)
+        paths = [output, metadata_path] if output.suffix.lower() == ".csv" else [output]
+        register_report(store, state, "ranking", {"complete": data["complete"], "input_hash": data["input_hash"],
+                                                 "settings": data["settings"]}, paths)
+    emit(data, warnings=warnings, next_steps=[shlex.join(["zermelo", "--project", str(store.root), "next"])])
 
 
 def fit_project(state, *, method="pl", regularization=1.0, k_factor=32.0, weighting="entrant",
@@ -451,7 +423,7 @@ def fit_project(state, *, method="pl", regularization=1.0, k_factor=32.0, weight
     data = score(state["entrants"], ballots, method=method, regularization=regularization,
                  k_factor=k_factor, weighting=weighting)
     data.update({"criterion": state["criterion"], "complete": not incomplete, "package_version": __version__,
-                 "coverage": coverage, "input_hash": digest(state),
+                 "coverage": coverage, "input_hash": evidence_hash(state),
                  "settings": {"method": method, "regularization": regularization, "k_factor": k_factor,
                               "weighting": data["weighting"]},
                  "ballot_hashes": {row["key"]: digest(row) for row in ballots},
@@ -509,12 +481,14 @@ def calibrate_plan(store, calibration_id, batch_sizes, sample, subsets, repeats,
 @click.pass_obj
 def calibrate_analyze(store, calibration_id, max_disagreement, costs, reference, output):
     """Measure within-judge disagreement and recommend among completed candidate sizes."""
-    data = analyze_calibration(store.load(), calibration_id, max_disagreement=max_disagreement,
+    state = store.load()
+    data = analyze_calibration(state, calibration_id, max_disagreement=max_disagreement,
                                costs=read_json(costs) if costs else None,
                                reference=read_json(reference) if reference else None)
     if output:
         write_new(output, data)
-    emit(data)
+    register_report(store, state, "calibration", data, [output] if output else [])
+    emit(data, next_steps=[shlex.join(["zermelo", "--project", str(store.root), "next"])])
 
 
 @main.command("budget")

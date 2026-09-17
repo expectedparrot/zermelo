@@ -38,6 +38,42 @@ zermelo capabilities
 zermelo guide
 ```
 
+### Agent workflow
+
+Select a project with `zermelo project use runs/study`, read `zermelo guide`, then
+call `zermelo next` after each action. `next` is read-only: it never exports jobs,
+submits inference, or spends credits.
+
+Its JSON `data` contains `workflow_schema_version`, `stage`, `reason`, and `actions`.
+Each action supplies an `argv` array, a shell-quoted `command`, `required_inputs`,
+`runnable`, `prerequisites`, `external`, and `may_spend_credits`. Fill placeholders
+such as `{criterion}`, `{agent_list_path}`, or `{model}` from the study's intended
+inputs before running an action. `runnable` means there are no missing arguments;
+check prerequisites and inference authorization separately. Top-level `next_steps`
+contains only actions without missing arguments. Actions are suggestions, not a
+queue to execute blindly; an external run also includes a cost-estimate action to
+use beforehand.
+
+The guided path registers entrants and a native ranker panel, plans comparisons,
+exports to an explicit shallow job path, awaits external execution, imports
+results, and saves a ranking. It preserves panels already frozen in exported jobs.
+The direct export command still supports an explicit panel or the legacy neutral
+judge; `next` asks for a registered panel when guiding new exports.
+
+After a partial import, guidance proposes rerunning the frozen **full job** with
+EP's cache and a fresh results filename. Cache misses can rerun successful cells
+and incur charges. Returned files are imported with `--skip-invalid`; rejected
+rows remain visible, and conflicting ballots still fail. Existing artifacts are
+never overwritten by the suggested commands.
+
+`calibrate analyze` records its report so guidance can advance to production using
+the recommended size. If no size qualifies, the agent must review the result and
+explicitly choose a size or run another pilot. `rank --output` records a saved
+deliverable; `next` reports `complete` only while the evidence and saved artifact
+hashes match. New evidence or missing/modified artifacts reopen the workflow.
+Printing a ranking alone does not mark it complete. Older saved rankings are not
+automatically registered; save a new output to establish this milestone.
+
 ## Quick start
 
 The included entrants are 20 fictional e-commerce product improvements. Choose a

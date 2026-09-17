@@ -25,6 +25,11 @@ def digest(data):
     return hashlib.sha256(canonical(data).encode()).hexdigest()
 
 
+def evidence_hash(state):
+    """Hash project evidence without workflow report bookkeeping."""
+    return digest({key: value for key, value in state.items() if key != "workflow_reports"})
+
+
 def read_json(path):
     return json.loads(Path(path).read_text())
 

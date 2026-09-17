@@ -283,9 +283,9 @@ def test_cli_init_registration_and_errors(tmp_path):
     path = tmp_path / "entrants.csv"
     path.write_text('id,name,description\na,Alpha,"Fast, inexpensive"\nb,Beta,Reliable\n')
     assert invoke(store, "entrants", "import", str(path)).exit_code == 0
-    assert json.loads(invoke(store, "next").output)["data"]["stage"] == "plan"
+    assert json.loads(invoke(store, "next").output)["data"]["stage"] in {"register_rankers", "install_fielding"}
     assert invoke(store, "batch", "plan", "pilot").exit_code == 0
-    assert json.loads(invoke(store, "next").output)["data"]["stage"] == "export"
+    assert json.loads(invoke(store, "next").output)["data"]["stage"] in {"register_rankers", "install_fielding"}
     result = invoke(store, "entrants", "add", "c", "--name", "C")
     assert result.exit_code == 0
     assert len(store.load()["entrants"]) == 3

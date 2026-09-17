@@ -11,7 +11,7 @@ from scipy.stats import kendalltau
 
 from .design import components
 from .scoring import score
-from .store import ZermeloError, digest
+from .store import ZermeloError, evidence_hash
 
 
 def ranking_ballots(state):
@@ -137,7 +137,7 @@ def assess_snapshot(state, previous, current, tolerance=.02):
             "stable_between_snapshots": movement <= threshold,
             "perturbation_within_tolerance": None if spread is None else spread <= threshold,
             "review_for_stopping": movement <= threshold and spread is not None and spread <= threshold,
-            "previous_input_hash": previous.get("input_hash"), "current_input_hash": digest(state),
+            "previous_input_hash": previous.get("input_hash"), "current_input_hash": evidence_hash(state),
             "limitations": ["A diagnostic for reviewing whether to stop, not an accuracy guarantee or automated spending policy.",
                             "Repeated snapshots share data. Stability does not establish a correct ranking.",
                             "A tolerance of .02 means movement within .02 times the number of entrants, not error relative to truth."]}

@@ -6,7 +6,7 @@ import random
 from collections import Counter
 from itertools import combinations
 
-from .store import ZermeloError, digest, identifier
+from .store import ZermeloError, digest, evidence_hash, identifier
 
 
 def components(entrant_ids, pairs):
@@ -165,7 +165,7 @@ def adaptive_design(state, batch_id, chunk_size=5, rounds=1, seed=0, *, strategy
     design.update({"tasks": tasks, "purpose": "ranking", "selection": {
         "strategy": strategy, "only_new": only_new, "new_entrants": new,
         "bridge_fraction_requested": bridge_fraction, "random_bridge_tasks": random_count,
-        "mandatory_tasks": minimum, "total_tasks": total, "base_input_hash": digest(state),
+        "mandatory_tasks": minimum, "total_tasks": total, "base_input_hash": evidence_hash(state),
         "fit": "pl" if fit else None, "regularization": 1.0 if fit else None,
         "priority": "inverse regularized diagonal pairwise information; scheduling proxy, not posterior variance"},
         "coverage": {"appearances": dict(sorted(appearances.items())), "unique_pairs": len(pairs),

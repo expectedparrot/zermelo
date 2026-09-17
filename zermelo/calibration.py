@@ -9,7 +9,7 @@ from itertools import combinations
 
 from . import fielding
 from .design import components, make_design
-from .store import ZermeloError, digest, identifier
+from .store import ZermeloError, digest, evidence_hash, identifier
 
 
 def kendall_distance(left, right):
@@ -135,7 +135,7 @@ def analyze_calibration(state, calibration_id, *, max_disagreement=.1, costs=Non
             "recommendation_rule": "Among sizes below the disagreement (and optional reference-error) threshold, "
                                    "maximize log2(k!)/supplied cost; without costs choose the largest eligible size.",
             "cost_source": "user estimates, not service billing" if costs else "not supplied; per-call comparison only",
-            "input_hash": digest(state), "plan": plan, "settings_hashes": sorted(settings),
+            "input_hash": evidence_hash(state), "plan": plan, "settings_hashes": sorted(settings),
             "costs": costs, "reference": reference,
             "source_hashes": sorted({row["source_sha256"] for row in state["ballots"].values()
                                      if row["batch_id"] in plan["batch_ids"]}),
