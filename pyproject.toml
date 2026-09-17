@@ -13,7 +13,7 @@ dependencies = ["click>=8.1", "numpy>=1.24", "scipy>=1.10"]
 [project.optional-dependencies]
 fielding = ["edsl>=1.0.8"]
 dev = ["pytest>=8", "ruff>=0.6", "build"]
-docs = ["pygments>=2.15", "matplotlib>=3.6"]
+docs = ["pygments>=2.15", "matplotlib>=3.6", "markdown>=3.4"]
 
 [project.scripts]
 zermelo = "zermelo.cli:main"

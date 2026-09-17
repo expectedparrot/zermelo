@@ -20,6 +20,10 @@ results, and produces JSON or CSV rankings. Execution is a separate `ep run` ste
 complete method using a live 50-state example, with captured commands, an
 interactive ballot-to-wins explanation, score interpretation, and actual results.
 
+**More examples:** [ten blog experiments](examples/blog_series/README.md) using
+original concept cards to demonstrate calibration, ranker disagreement, adaptive
+comparisons, late entrants, conditional sensitivity, and the guided workflow.
+
 ## Install
 
 From this directory:
